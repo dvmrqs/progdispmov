@@ -7,37 +7,36 @@ import CurrencyInput from "../../components/CurrencyInput";
 import DatePicker from "../../components/DatePicker";
 import CategoryPicker from "../../components/CategoryPicker";
 import { MoneyContext } from "../../contexts/GlobalState";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const initialForm = {
   description: "",
   value: 0,
   date: new Date(),
-  category: "income",
+  categoryId: "",
 };
 
 export default function AddTransactions() {
   const [form, setForm] = useState(initialForm);
+  const [saving, setSaving] = useState(false);
   const valueInputRef = useRef();
-  const [transactions, setTransactions] = useContext(MoneyContext);
+  const { addTransaction, categories } = useContext(MoneyContext);
 
-  const setAsyncStorage = async (data) => {
+  const handleAdd = async () => {
+    setSaving(true);
     try {
-      await AsyncStorage.setItem("transactions", JSON.stringify(data));
+      await addTransaction({
+        description: form.description,
+        value: form.value,
+        date: form.date,
+        categoryId: form.categoryId || categories[0]?.id,
+      });
+      setForm(initialForm);
+      Alert.alert("Sucesso!", "Transação adicionada com sucesso!");
     } catch (e) {
-      console.log(e);
+      Alert.alert("Erro", e.message);
+    } finally {
+      setSaving(false);
     }
-  };
-
-  const addTransaction = async () => {
-    const newTransaction = { id: transactions.length + 1, ...form };
-    const updatedTransactions = [...transactions, newTransaction];
-
-    setTransactions(updatedTransactions);
-    setForm(initialForm);
-    await setAsyncStorage(updatedTransactions);
-
-    Alert.alert("Sucesso!", "Transação adicionada com sucesso!");
   };
 
   return (
@@ -50,7 +49,9 @@ export default function AddTransactions() {
             <DatePicker form={form} setForm={setForm} />
             <CategoryPicker form={form} setForm={setForm} />
           </View>
-          <Button onPress={addTransaction}>Adicionar</Button>
+          <Button onPress={handleAdd} disabled={saving}>
+            {saving ? "Salvando..." : "Adicionar"}
+          </Button>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
