@@ -2,13 +2,16 @@ import { useContext, useMemo, useState } from "react";
 import { MoneyContext } from "../../contexts/GlobalState";
 import { globalStyles } from "../../styles/globalStyles";
 import SummaryItem from "../../components/SummaryItem";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../../constants/colors";
+import { PieChart } from "react-native-chart-kit";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
   "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ];
+
+const screenWidth = Dimensions.get("window").width;
 
 export default function Summary() {
   const { transactions, categories } = useContext(MoneyContext);
@@ -43,6 +46,16 @@ export default function Summary() {
     return { map, sum };
   }, [filtered]);
 
+  const pieData = categories
+    .filter((cat) => (totals.map[cat.id] ?? 0) > 0)
+    .map((cat) => ({
+      name: cat.displayName,
+      value: totals.map[cat.id],
+      color: cat.background,
+      legendFontColor: colors.primaryText,
+      legendFontSize: 13,
+    }));
+
   const valueStyle = totals.sum > 0 ? globalStyles.positiveText : globalStyles.negativeText;
 
   return (
@@ -56,7 +69,22 @@ export default function Summary() {
           <Text style={styles.arrowText}>{">"}</Text>
         </TouchableOpacity>
       </View>
-      <View style={globalStyles.content}>
+
+      <ScrollView style={globalStyles.content}>
+        {pieData.length > 0 && (
+          <PieChart
+            data={pieData}
+            width={screenWidth - 16}
+            height={200}
+            chartConfig={{
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="value"
+            backgroundColor="transparent"
+            paddingLeft="8"
+          />
+        )}
+
         {categories.map((cat) => (
           <SummaryItem
             key={cat.id}
@@ -64,6 +92,7 @@ export default function Summary() {
             value={totals.map[cat.id] ?? 0}
           />
         ))}
+
         <View style={globalStyles.line} />
         <View style={styles.balance}>
           <Text style={styles.balanceText}>Saldo</Text>
@@ -71,7 +100,7 @@ export default function Summary() {
             {totals.sum.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 }
