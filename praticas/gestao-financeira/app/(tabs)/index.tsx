@@ -1,5 +1,5 @@
 import { MoneyContext } from "../../contexts/GlobalState";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
   ActivityIndicator, FlatList, RefreshControl,
   Text, View, Alert, StyleSheet, TouchableOpacity
@@ -7,6 +7,7 @@ import {
 import TransactionItem from "../../components/TransactionItem";
 import { globalStyles } from "../../styles/globalStyles";
 import { colors } from "../../constants/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -18,6 +19,13 @@ export default function Transactions() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    AsyncStorage.getItem("loggedUser").then((data) => {
+      if (data) setUserName(JSON.parse(data).name);
+    });
+  }, []);
 
   const filtered = transactions.filter((tx: any) => {
     const d = new Date(tx.date);
@@ -51,6 +59,9 @@ export default function Transactions() {
 
   return (
     <View style={globalStyles.screenContainer}>
+      {userName ? (
+        <Text style={styles.welcome}>Olá, {userName}! 👋</Text>
+      ) : null}
       <View style={styles.filterRow}>
         <TouchableOpacity onPress={prevMonth} style={styles.arrow}>
           <Text style={styles.arrowText}>{"<"}</Text>
@@ -77,6 +88,13 @@ export default function Transactions() {
 }
 
 const styles = StyleSheet.create({
+  welcome: {
+    fontSize: 15,
+    color: colors.primaryText,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    fontWeight: "600",
+  },
   filterRow: {
     flexDirection: "row",
     alignItems: "center",
