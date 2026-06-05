@@ -8,6 +8,7 @@ import TransactionItem from "../../components/TransactionItem";
 import { globalStyles } from "../../styles/globalStyles";
 import { colors } from "../../constants/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 const MONTHS = [
   "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -26,6 +27,11 @@ export default function Transactions() {
       if (data) setUserName(JSON.parse(data).name);
     });
   }, []);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("loggedUser");
+    router.replace("/login" as any);
+  };
 
   const filtered = transactions.filter((tx: any) => {
     const d = new Date(tx.date);
@@ -60,7 +66,12 @@ export default function Transactions() {
   return (
     <View style={globalStyles.screenContainer}>
       {userName ? (
-        <Text style={styles.welcome}>Olá, {userName}! 👋</Text>
+        <View style={styles.welcomeRow}>
+          <Text style={styles.welcome}>Olá, {userName}! 👋</Text>
+          <TouchableOpacity onPress={handleLogout}>
+            <Text style={styles.logout}>Sair</Text>
+          </TouchableOpacity>
+        </View>
       ) : null}
       <View style={styles.filterRow}>
         <TouchableOpacity onPress={prevMonth} style={styles.arrow}>
@@ -88,11 +99,21 @@ export default function Transactions() {
 }
 
 const styles = StyleSheet.create({
+  welcomeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
   welcome: {
     fontSize: 15,
     color: colors.primaryText,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    fontWeight: "600",
+  },
+  logout: {
+    fontSize: 14,
+    color: colors.primary,
     fontWeight: "600",
   },
   filterRow: {
