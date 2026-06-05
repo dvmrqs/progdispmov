@@ -1,0 +1,38 @@
+{
+  "info": {
+    "name": "Gestão Financeira API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": { "method": "GET", "url": "http://localhost:3000" }
+    },
+    {
+      "name": "Listar Categorias",
+      "request": { "method": "GET", "url": "http://localhost:3000/categories" }
+    },
+    {
+      "name": "Criar Categoria",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/categories",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"name\":\"health\",\"displayName\":\"Saúde\",\"icon\":\"favorite\",\"background\":\"#FFB6B6\",\"isIncome\":false}" }
+      }
+    },
+    {
+      "name": "Listar Transações",
+      "request": { "method": "GET", "url": "http://localhost:3000/transactions" }
+    },
+    {
+      "name": "Criar Transação",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:3000/transactions",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"description\":\"Salário de outubro\",\"value\":3500.50,\"date\":\"2026-04-29\",\"categoryId\":\"cmpgv3u370000dqn840jo8m9y\"}" }
+      }
+    }
+  ]
+}
